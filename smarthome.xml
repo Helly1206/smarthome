@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<smarthome>
+	<webprefix/>
+	<webhookdirect>/webhook</webhookdirect>
+	<googleclientid>[GOOGLECLIENTID]</googleclientid>
+	<googleclientsecret>[GOOGLECLIENTSERCRET]</googleclientsecret>
+	<googleapikey>[GOOGLEAPIKEY]</googleapikey>
+	<username>[MYUSERNAME]</username>
+	<password>[MYHASHEDPASSWORD-> use password generator]</password>
+	<debuglog>false</debuglog>
+	<webserver>
+		<ssl>true</ssl>
+		<port>4043</port>
+		<certificate>[MYSSHKEYLOCATION]/fullchain.pem</certificate>
+		<privatekey>[MYSSHKEYLOCATION]/privkey.pem</privatekey>
+		<externaldeployment>true</externaldeployment>
+		<serveradmin>[MYADMINEMAIL]</serveradmin>
+		<servername>[EXTERNALSERVERNAME]</servername>
+	</webserver>
+</smarthome>

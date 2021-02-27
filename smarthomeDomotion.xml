@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<smarthomeDomotion>
+	<server></server>
+    <port></port>
+	<username></username>
+	<password></password>
+    <debuglog>false</debuglog>
+</smarthomeDomotion>

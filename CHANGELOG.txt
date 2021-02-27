@@ -1,0 +1,3 @@
+[B]0.8.0[/B]
+- First working Beta release. All functions should work but aren't tested in detail yet
+- Extended features and manual to be done

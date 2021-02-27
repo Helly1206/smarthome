@@ -1,0 +1,13 @@
+# gsh Web Server - Service for gsh Web Server
+
+[Unit]
+Description=gsh (google SmartHome) Web Server
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/opt/smarthome/gshWebStarter
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target

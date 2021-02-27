@@ -1,0 +1,46 @@
+#!/usr/bin/python3
+
+# -*- coding: utf-8 -*-
+#########################################################
+# SCRIPT : gshApps                                      #
+#          Run required google smarthome apps           #
+#                                                       #
+#          I. Helwegen 2021                             #
+#########################################################
+
+####################### IMPORTS #########################
+
+from apps.Domotion import Domotion
+from sys import argv
+from webif.devices import devices
+import signal
+
+####################### GLOBALS #########################
+APP_NAME = "smarthome"
+#########################################################
+
+###################### FUNCTIONS ########################
+def exit_app(signum, frame):
+    if (DomotionApp != None):
+        DomotionApp.terminate()
+#########################################################
+
+######################### MAIN ##########################
+if __name__ == "__main__":
+    DomotionApp = None
+
+    signal.signal(signal.SIGINT, exit_app)
+    signal.signal(signal.SIGTERM, exit_app)
+
+    devlist = []
+    Devices = devices(__file__, APP_NAME).getAll()
+    for key, value in Devices.items():
+        if "backEnd" in value:
+            if "device" in value["backEnd"]:
+                if value["backEnd"]["device"] not in devlist:
+                    devlist.append(value["backEnd"]["device"])
+
+    for dev in devlist:
+        if dev.lower() == "domotion":
+            DomotionApp = Domotion(__file__, APP_NAME)
+            DomotionApp.run(argv[1:])

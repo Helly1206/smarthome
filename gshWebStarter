@@ -1,0 +1,6 @@
+#!/usr/bin/python3
+
+from main.gshWebStarter import gshWebStarter
+from sys import argv
+
+gshWebStarter().run(argv[1:])

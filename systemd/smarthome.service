@@ -1,0 +1,13 @@
+# smarthome Apps - Service for smarthome Apps
+
+[Unit]
+Description=gsh (google SmartHome) Apps
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/opt/smarthome/gshApps
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target
