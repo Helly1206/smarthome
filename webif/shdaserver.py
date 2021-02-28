@@ -14,11 +14,12 @@ import queue
 import os
 from json import dumps, loads
 import logging
+from time import sleep
 
 #########################################################
 
 ####################### GLOBALS #########################
-
+SEND_CONNECT_RETRIES = 3
 #########################################################
 
 ###################### FUNCTIONS ########################
@@ -210,12 +211,18 @@ class shdaserver(Thread):
 
     def Send(self, device, data):
         rdata = None
-        self.recd.clear()
-        try:
-            sock = [k for k, v in list(self.devices.items()) if v == device][0]
-        except:
-            sock = None
+        retry = 0
+        sock = None
+        while not sock and retry < SEND_CONNECT_RETRIES:
+            try:
+                sock = [k for k, v in list(self.devices.items()) if v == device][0]
+            except:
+                sock = None
+            if not sock:
+                retry += 1
+                sleep(self.timeout)
         if sock:
+            self.recd.clear()
             self._addtosendbuf(sock, dumps(data))
             os.write(self.unblockselect[1], b'x')
 

@@ -177,7 +177,7 @@ class bdaclient(Thread):
                         self.connected = False
                         self.logger.info("Disconnected from %s", self.peername)
                 else:
-                    sleep(1)
+                    sleep(self.timeout)
 
             self.logger.info("terminating")
         except Exception as e:

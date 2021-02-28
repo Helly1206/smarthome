@@ -20,12 +20,13 @@ import requests
 import logging
 import logging.handlers
 import locale
+import atexit
 
 #########################################################
 
 ####################### GLOBALS #########################
 context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-VERSION = "1.00"
+VERSION = "0.81"
 HOMEGRAPH_URL = 'https://homegraph.googleapis.com/'
 REQUEST_SYNC_BASE_URL = HOMEGRAPH_URL + 'v1/devices:requestSync'
 APP_NAME = "smarthome"
@@ -341,6 +342,11 @@ def webhook():
 
         return jsonify(response), 200
 
+def terminate():
+    app.smarthome.terminate()
+
+atexit.register(terminate)
+
 #########################################################
 # main                                                  #
 #########################################################
@@ -402,7 +408,7 @@ def main(argv):
             app.run(host="0.0.0.0", debug=False, use_reloader=False, port=port, ssl_context=context)
         else:
             app.run(host="0.0.0.0", debug=False, use_reloader=False, port=port)
-        app.smarthome.terminate()
+        #app.smarthome.terminate()
     except Exception as e:
         print(e)
 

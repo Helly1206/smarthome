@@ -21,7 +21,7 @@ from .utils.xmlsettings import xmlsettings
 
 ####################### GLOBALS #########################
 appName  = "Domotion"
-version  = "0.80"
+version  = "0.81"
 XML_NAME = "smarthomeDomotion.xml"
 #########################################################
 
