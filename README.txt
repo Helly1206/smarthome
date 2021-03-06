@@ -1,4 +1,4 @@
-gsh - smarthome v0.81
+gsh - smarthome v0.85
 
 GSH - Google smarthome multiplexer
 === = ====== ========= ===========

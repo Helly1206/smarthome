@@ -9,7 +9,21 @@
 #########################################################
 
 ####################### IMPORTS #########################
+from main.gshMux import gshMux
 
+####################### GLOBALS #########################
+
+#########################################################
+
+###################### FUNCTIONS ########################
+
+#########################################################
+
+######################### MAIN ##########################
+
+gshMux(__file__).run()
+
+"""
 from apps.Domotion import Domotion
 from sys import argv
 from webif.devices import devices
@@ -44,3 +58,4 @@ if __name__ == "__main__":
         if dev.lower() == "domotion":
             DomotionApp = Domotion(__file__, APP_NAME)
             DomotionApp.run(argv[1:])
+"""

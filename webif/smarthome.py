@@ -6,7 +6,7 @@
 #########################################################
 
 ####################### IMPORTS #########################
-from shdaserver import shdaserver
+from appsaccess import appsaccess
 from devices import devices
 from itertools import product
 import logging
@@ -51,17 +51,15 @@ class smarthome(object):
     def __init__(self, file = "", name = "", basename = "SmartHome"):
         self.logger = logging.getLogger('{}.smarthome'.format(basename))
         self.devices = devices(file, name)
-        self.server = shdaserver(basename)
-        self.server.start()
+        self.client = appsaccess(basename)
 
     def __del__(self):
-        del self.server
+        del self.client
         del self.devices
 
     def terminate(self):
-        if self.server:
-            self.server.terminate()
-            self.server.join(5)
+        if self.client:
+            self.client.terminate()
 
     def process(self, message, token):
         request_id = message.get('requestId')  # type: str
@@ -146,7 +144,7 @@ class smarthome(object):
                     status = "ERROR"
                     errorCode = ERR_DEVICE_NOT_FOUND
                 else:
-                    rdata = self.server.Send(shdadevice, shdadata)
+                    rdata = self.client.Send(shdadevice, shdadata)
                     if rdata:
                         if self.checkshdaData(devid, rdata):
                             values = self.getshdaValues(rdata)
@@ -196,7 +194,7 @@ class smarthome(object):
                         status = "ERROR"
                         errorCode = ERR_DEVICE_NOT_FOUND
                     else:
-                        rdata = self.server.Send(shdadevice, shdadata)
+                        rdata = self.client.Send(shdadevice, shdadata)
                         if rdata:
                             if self.checkshdaData(devid, rdata):
                                 values = self.getshdaValues(rdata)

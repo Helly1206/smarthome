@@ -1,3 +1,7 @@
+[B]0.8.5[/B]
+- Removed shda and implement simpler protocol to prevent port termination error on external deployment
+- Implemented mux to select correct app in gshApps
+
 [B]0.8.1[/B]
 - Fix bug in server connection on external deployment
 - Add terminate to close port for external deployment
