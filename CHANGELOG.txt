@@ -1,3 +1,6 @@
+[B]0.8.6[/B]
+- Added mutex to prevent error on handling multiple commands
+
 [B]0.8.5[/B]
 - Removed shda and implement simpler protocol to prevent port termination error on external deployment
 - Implemented mux to select correct app in gshApps

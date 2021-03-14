@@ -9,6 +9,7 @@
 from appsaccess import appsaccess
 from devices import devices
 from itertools import product
+from threading import Lock
 import logging
 
 #########################################################
@@ -49,19 +50,22 @@ class SmartHomeError(Exception):
 #########################################################
 class smarthome(object):
     def __init__(self, file = "", name = "", basename = "SmartHome"):
-        self.logger = logging.getLogger('{}.smarthome'.format(basename))
+        self.logger  = logging.getLogger('{}.smarthome'.format(basename))
         self.devices = devices(file, name)
-        self.client = appsaccess(basename)
+        self.client  = appsaccess(basename)
+        self.mutex   = Lock()
 
     def __del__(self):
         del self.client
         del self.devices
+        del self.mutex
 
     def terminate(self):
         if self.client:
             self.client.terminate()
 
     def process(self, message, token):
+
         request_id = message.get('requestId')  # type: str
         inputs = message.get('inputs')  # type: list
 
@@ -80,7 +84,9 @@ class smarthome(object):
             return {'requestId': request_id, 'payload': {'errorCode': ERR_PROTOCOL_ERROR}}
 
         try:
+            self.mutex.acquire()
             result = handler(inputs[0].get('payload'), token)
+            self.mutex.release()
             return {'requestId': request_id, 'payload': result}
 
         except SmartHomeError as err:
