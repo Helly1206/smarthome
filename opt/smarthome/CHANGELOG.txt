@@ -1,3 +1,9 @@
+[B]0.9.0[/B]
+- Changing installation for DPKG/ APT compatibility
+- Updated Apache2Config for better compatibility with other tools
+- Updated starting order for systemd
+- Updated BDA server and client on missing IP addresses op startup
+
 [B]0.8.6[/B]
 - Added mutex to prevent error on handling multiple commands
 

@@ -71,12 +71,12 @@ class bdauri(object):
 
         return url
 
-    @classmethod 
-    def IsUri(cls, uri):    
+    @classmethod
+    def IsUri(cls, uri):
         pos = uri.find(cls.prefix)
         return (pos==0)
 
-    @classmethod 
+    @classmethod
     def TestAuth(cls, uri, username="", password=""):
         AuthOk = False
         pos = uri.find("@")
@@ -96,13 +96,13 @@ class bdauri(object):
                 AuthOk = True
         return AuthOk
 
-    @classmethod 
+    @classmethod
     def GetDeviceUrl(cls, uri):
         url = ""
         if cls.IsUri(uri):
             urisub = uri[len(cls.prefix):]
             pos = urisub.find("@")
-            
+
             urisub = urisub[pos+1:]
             pos = urisub.rfind("/")
             if pos >= 0:
@@ -121,7 +121,7 @@ class bdauri(object):
                 purl = "/"
             purl += url
             if url[-1] != "/":
-                purl += "/" 
+                purl += "/"
 
         return purl
 
@@ -148,7 +148,7 @@ class bdauri(object):
                     break
         return TrustedOk
 
-    @classmethod 
+    @classmethod
     def GetData(cls, uri):
         data = ""
         if cls.IsUri(uri):
@@ -208,18 +208,20 @@ class bdauri(object):
         adapters = ifaddr.get_adapters()
         for adapter in adapters:
             if (adapter.name == ifname):
-                ip = adapter.ips[0].ip
+                for ipn in adapter.ips:
+                    if type(ipn.ip) is not tuple: # disable support for ipv6
+                        ip = ipn.ip
         return ip
 
     @classmethod
-    def find_ip_address(cls):
-        ip=None
+    def find_ip_address(cls, uselo = False):
+        ip = None
         try:
-            ip=cls.get_ip_address('eth0')
+            ip = cls.get_ip_address('eth0')
             if not ip:
-                ip=cls.get_ip_address('wlan0')
-                if not ip:
-                    ip=cls.get_ip_address('lo')
+                ip = cls.get_ip_address('wlan0')
+                if not ip and uselo:
+                    ip = cls.get_ip_address('lo')
         except:
             pass
         return ip

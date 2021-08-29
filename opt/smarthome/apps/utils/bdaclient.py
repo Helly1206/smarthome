@@ -38,14 +38,11 @@ class bdaclient(Thread):
         self.deviceurl = url
         self.username = username
         self.password = password
-        if not server:
-            server = bdauri.find_ip_address()
-
-        if not host:
-            host = bdauri.find_ip_address()
-
-        self.deviceurl = bdauri.BuildURL(host, url)
-        self.server_address = (server, int(port))
+        self.server = server
+        self.host = host
+        self.port = int(port)
+        self.url = url
+        self.server_address = None
 
         Thread.__init__(self)
         self.term = Event()
@@ -96,14 +93,28 @@ class bdaclient(Thread):
                             self.introcount += 1
                     else:
                         try:
-                            # Check communication with Domotion server
-                            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                            self.sock.connect(self.server_address)
-                            self.sock.setblocking(0)
-                            self.peername = self.sock.getpeername()
-                            self.introduced = False
-                            self.connected = True
-                            self.logger.info("Connected to %s", self.peername)
+                            if not self.server or not self.host:
+                                ip = None
+                                while (not self.term.isSet()) and (not ip):
+                                    ip = bdauri.find_ip_address()
+                                    sleep(self.timeout)
+                                if not self.server:
+                                    self.server = ip
+                                if not self.host:
+                                    self.host = ip
+
+                            if not self.term.isSet():
+                                self.deviceurl = bdauri.BuildURL(self.host, self.url)
+                                self.server_address = (self.server, self.port)
+
+                                # Check communication with Domotion server
+                                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                                self.sock.connect(self.server_address)
+                                self.sock.setblocking(0)
+                                self.peername = self.sock.getpeername()
+                                self.introduced = False
+                                self.connected = True
+                                self.logger.info("Connected to %s", self.peername)
                         except:
                             if (self.sock):
                                 self.sock.close()
@@ -177,7 +188,7 @@ class bdaclient(Thread):
                         self.connected = False
                         self.logger.info("Disconnected from %s", self.peername)
                 else:
-                    sleep(self.timeout)
+                    sleep(1)
 
             self.logger.info("terminating")
         except Exception as e:
@@ -238,8 +249,7 @@ class bdaclient(Thread):
         return rtag, rvalue
 
     def SendInfoRequest(self, info, tag):
-        rtag = None
-        rvalue = None
+        recddata = ["ERROR", tag, "NULL"]
         data = None
         self.recd.clear()
 

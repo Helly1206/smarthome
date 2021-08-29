@@ -17,7 +17,7 @@
             <hwVersion>1.0</hwVersion>
             <swVersion>1.2</swVersion>
         </deviceInfo>
-        <backEnd> # Your backend information
+        <backEnd>
             <device>Domotion</device>
             <tag>simplelight</tag>
             <type>light</type>

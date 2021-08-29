@@ -1,0 +1,8 @@
+smarthome (0.90) stable; urgency=low
+
+  * Changing installation for DPKG/ APT compatibility
+  * Updated Apache2Config for better compatibility with other tools
+  * Updated starting order for systemd
+  * Updated BDA server and client on missing IP addresses op startup
+
+ -- Helly1206 <hellyrulez@hotmail.com>  Sun, 29 Aug 2021 10:49:53 +0100

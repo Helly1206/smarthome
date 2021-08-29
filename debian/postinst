@@ -1,0 +1,53 @@
+#!/bin/bash
+NAME="smarthome"
+WEBNAME="gsh"
+ETCDIR="/etc"
+OPTDIR="/opt"
+OPTLOC="$OPTDIR/$NAME"
+SYSTEMDDIR="./systemd"
+SERVICEDIR="$ETCDIR/systemd/system"
+SERVICESCRIPT="$NAME.service"
+WEBSERVICESCRIPT="$WEBNAME.service"
+PIP_INSTALL="$OPTLOC/pip_install.sh"
+A2CHECKFILE="$OPTLOC/Apache2Config"
+A2CHECK="$A2CHECKFILE -c"
+A2INSTALLFILE="$OPTLOC/apache2_install.sh"
+A2INSTALL="$A2INSTALLFILE"
+
+py3clean "$OPTLOC"
+
+if [ -f "$PIP_INSTALL" ]; then
+    $PIP_INSTALL
+fi
+
+echo "Install automatic startup service for $NAME"
+if [ -f "$SERVICEDIR/$SERVICESCRIPT" ]; then
+    systemctl enable $SERVICESCRIPT
+    systemctl start $SERVICESCRIPT
+fi
+
+echo "Install automatic startup service for $WEBNAME"
+if [ -f "$SERVICEDIR/$WEBSERVICESCRIPT" ]; then
+    systemctl enable $WEBSERVICESCRIPT
+    systemctl start $WEBSERVICESCRIPT
+fi
+
+if [ -f "$A2CHECKFILE" ]; then
+    $A2CHECK
+    result=$?
+    if [ $result -eq 0 ]
+    then
+        echo "No external deploment sites found in /etc/smarthome/smarthome.xml"
+        echo "Manually modify xml file and run /opt/smarthome/apache2_install.sh if required."
+    else
+        echo "External deploment sites found in /etc/smarthome/smarthome.xml"
+        echo "Installing apache2 deployment files."
+        if [ -f "$A2INSTALLFILE" ]; then
+            $A2INSTALL
+        else
+            echo "$A2INSTALLFILE not found"
+        fi
+    fi
+fi
+
+exit 0

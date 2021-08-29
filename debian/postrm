@@ -1,0 +1,53 @@
+#!/bin/bash
+NAME="smarthome"
+WEBNAME="gsh"
+ETCDIR="/etc"
+OPTDIR="/opt"
+OPTLOC="$OPTDIR/$NAME"
+SYSTEMDDIR="./systemd"
+SERVICEDIR="$ETCDIR/systemd/system"
+SERVICESCRIPT="$NAME.service"
+WEBSERVICESCRIPT="$WEBNAME.service"
+A2CHECKFILE="$OPTLOC/Apache2Config"
+A2CHECK="$A2CHECKFILE -c"
+A2INSTALLFILE="$OPTLOC/apache2_install.sh"
+A2UNINSTALL="$A2INSTALLFILE -f"
+
+if [ -f "$A2CHECKFILE" ]; then
+    $A2CHECK
+    result=$?
+    if [ $result -eq 0 ]
+    then
+        echo "No external deploment sites found in /etc/smarthome/smarthome.xml"
+        echo "Nothing to uninstall"
+    else
+        echo "External deploment sites found in /etc/smarthome/smarthome.xml"
+        echo "Uninstalling apache2 deployment files."
+        if [ -f "$A2INSTALLFILE" ]; then
+            $A2UNINSTALL
+        else
+            echo "$A2INSTALLFILE not found"
+        fi
+    fi
+fi
+
+if [ -f "$SERVICEDIR/$SERVICESCRIPT" ]; then
+    echo "Uninstalling service $NAME"
+    systemctl stop "$SERVICESCRIPT"
+    systemctl disable "$SERVICESCRIPT"
+fi
+
+if [ -f "$SERVICEDIR/$WEBSERVICESCRIPT" ]; then
+    systemctl stop "$WEBSERVICESCRIPT"
+    echo "Uninstalling service $WEBNAME"
+    systemctl disable "$WEBSERVICESCRIPT"
+fi
+
+py3clean "$OPTLOC"
+
+#echo "Removing files"
+#if [ -d "$OPTLOC" ]; then
+#    rm -rf "$OPTLOC"
+#fi
+
+exit 0

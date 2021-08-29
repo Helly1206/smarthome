@@ -2,6 +2,8 @@
 
 [Unit]
 Description=gsh (google SmartHome) Apps
+Wants=Domotion.service
+After=Domotion.service
 After=network-online.target
 
 [Service]

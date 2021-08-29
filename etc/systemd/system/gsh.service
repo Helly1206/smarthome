@@ -2,6 +2,8 @@
 
 [Unit]
 Description=gsh (google SmartHome) Web Server
+Wants=smarthome.service
+After=smarthome.service
 After=network-online.target
 
 [Service]

@@ -1,4 +1,4 @@
-gsh - smarthome v0.86
+gsh - smarthome v0.90
 
 GSH - Google smarthome multiplexer
 === = ====== ========= ===========
@@ -8,7 +8,7 @@ but also apps can be made to talk with other 3rd party devices.
 
 Installation:
 -------------
-- Browse to: https://github.com/Helly1206/gsh
+- Browse to: https://github.com/Helly1206/smarthome
 - Click the 'Clone or Download' button
 - Click 'Download Zip'
 - Unzip the zip file to a temporary location
@@ -74,7 +74,7 @@ Exernal deployment can be used to deploy the webserver on an external server lik
 
 If you would like to use external deployment by Apache2:
 - First make <externaldeployment> true for the required sites in /etc/smarthome/smarthome.xml and take care that all the other fields are correctly filled in (e.g. when using ssl, make the servername equal to the website host).
-- Enter: 'sudo ./install.sh -a'
+- Enter: 'sudo ./apache2_install.sh'
 - The webserver(s) are now installed in Apache2 and enabled. Take care that you open the required ports in the firewall when accessing from another computer.
 
 Take care that if you have a different application running on the same port (e.g. Domotion on 443), install this application first.
@@ -89,8 +89,15 @@ Installer options:
 sudo ./install.sh    --> Installs gsh
 sudo ./install.sh -u --> Uninstalls gsh
 sudo ./install.sh -c --> Deletes compiled files in install folder (only required when copying or zipping the install folder)
-sudo ./install.sh -a --> Install Apache2 and/ or configures Apache2 with the gsh Webserver
-sudo ./install.sh -b --> Removes the gsh Webserver from the Apache2 folder, it doesn't uninstall Apache2, neither removes entries. Remove the entries in /etc/smarthome/smarthome.xml and run sudo ./install.sh -a to remove the entries first, before running sudo ./install.sh -b
+
+sudo /opt/smarthome/apache2_install.sh --> Install Apache2 and/ or configures Apache2 with the gsh Webserver
+sudo /opt/smarthome/apache2_install.sh -u --> Removes the gsh Webserver form the Apache2 folder, it doesn't uninstall Apache2, neither removes entries. Remove the entries in /etc/smarthome/smarthome.xml and run sudo /opt/smarthome/apache2_install.sh to remove the entries first, before running sudo opt/smarthome/apache2_install.sh -u
+
+Package install:
+------- --------
+Gsh installs automatically from deb package/ apt repository (only for debian based distros like debian or ubuntu).
+If external deployment is set true in at least one of the entries in /etc/smarthome.xml, then the apache2 installer is executed automatically.
+After changing smarthome.xml, /opt/smarthome/apache2_install.sh needs to be executed manually.
 
 Security:
 ---------

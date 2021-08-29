@@ -2,7 +2,7 @@
 INSTALL="/usr/bin/install -c"
 INSTALL_DATA="$INSTALL -m 644"
 INSTALL_PROGRAM="$INSTALL"
-INSTALL_FOLDER="cp -r *"
+INSTALL_FOLDER="cp -r"
 NAME="smarthome"
 WEBNAME="gsh"
 APPSNAME="gshApps"
@@ -19,11 +19,8 @@ SYSTEMDDIR="./systemd"
 SERVICEDIR="$ETCDIR/systemd/system"
 SERVICESCRIPT="$NAME.service"
 WEBSERVICESCRIPT="$WEBNAME.service"
-WEB_ROOT="/var/www"
-GSHWEB_ROOT="$WEB_ROOT/$NAME"
-WEBLOC="./webif"
-INSTALL_WEB="cp -r $WEBLOC/*"
-A2CONFIG="Apache2Config"
+PIP_INSTALL="$OPTLOC/pip_install.sh"
+DEBFOLDER="debian"
 
 if [ "$EUID" -ne 0 ]
 then
@@ -53,67 +50,27 @@ then
 	echo "  <no argument>: install gsh smarthome"
 	echo "  -u/ -U       : uninstall gsh smarthome"
 	echo "  -h/ -H       : this help file"
-	echo "  -a/ -A       : install Apache2 WSGI web deployment"
-	echo "  -b/ -B       : uninstall Apache2 WSGI web deployment"
+    echo "  -d/ -D       : build debian package"
 	echo "  -c/ -C       : Cleanup compiled files in install folder"
+    echo ""
+    echo "Apache2 install is removed from this install script"
+    echo "To install apach2 web deployment, run /opt/smarthome/apache2_install.sh"
 elif [ "$1" == "-c" ] || [ "$1" == "-C" ]
 then
 	echo "$NAME Deleting compiled files in install folder"
 	py3clean .
-elif [ "$1" == "-a" ] || [ "$1" == "-A" ]
+    rm -f ./*.deb
+	rm -rf "$DEBFOLDER"/${NAME,,}
+	rm -rf "$DEBFOLDER"/.debhelper
+	rm -f "$DEBFOLDER"/files
+	rm -f "$DEBFOLDER"/files.new
+	rm -f "$DEBFOLDER"/${NAME,,}.*
+elif [ "$1" == "-d" ] || [ "$1" == "-D" ]
 then
-	echo "$NAME Apache2 install script"
-	echo "Take care that you open the required ports when runnning ufw or another firewall"
-
-	echo "Check required packages"
-
-	PKG_OK=$(dpkg-query -W --showformat='${Status}\n' apache2|grep "install ok installed")
-	echo Checking for apache2: $PKG_OK
-	if [ "" == "$PKG_OK" ]; then
-		echo "No apache2. Setting up apache2."
-		sudo apt-get --force-yes --yes install apache2
-	fi
-
-	PKG_OK=$(dpkg-query -W --showformat='${Status}\n' libapache2-mod-wsgi-py3|grep "install ok installed")
-	echo Checking for libapache2-mod-wsgi-py3: $PKG_OK
-	if [ "" == "$PKG_OK" ]; then
-		echo "No libapache2-mod-wsgi-py3. Setting up libapache2-mod-wsgi-py3."
-		sudo apt-get --force-yes --yes install libapache2-mod-wsgi-py3
-	fi
-
-	echo "Enabling wsgi and ssl modules"
-	a2enmod wsgi &> /dev/null
-	a2enmod ssl &> /dev/null
-
-	echo "Installing $NAME on $WEB_ROOT"
-	if [ -d "$GSHWEB_ROOT" ]; then rm -rf "$GSHWEB_ROOT"; fi
-	if [ ! -d "$GSHWEB_ROOT" ]; then
-		mkdir "$GSHWEB_ROOT"
-	fi
-
-	$INSTALL_WEB "$GSHWEB_ROOT"
-
-	echo "Configuring apache2"
-	./$A2CONFIG
-
-elif [ "$1" == "-b" ] || [ "$1" == "-B" ]
-then
-	echo "$NAME Apache2 uninstall script"
-	echo "WARNING: Apache2 itself is not uninstalled, evenso conf files are not removed"
-	echo "         If you want to do so, remove all externaldeployment entries"
-	echo "         in /etc/Domotion/DomoWeb.xml and then run sudo ./install.sh -a"
-	echo "         This uninstaller only removes gsh files from apache's www folder"
-	read -p "Do you want to continue (Y/n)? " -n 1 -r
-	echo    # (optional) move to a new line
-	if [[ $REPLY =~ ^[Nn]$ ]]
-	then
-		echo "Skipping Apache2 uninstall script"
-	else
-		echo "Running Apache2 uninstall script"
-		echo "Uninstalling $NAME from $WEB_ROOT"
-
-		if [ -d "$GSHWEB_ROOT" ]; then rm -rf "$GSHWEB_ROOT"; fi
-	fi
+	echo "$NAME build debian package"
+	py3clean .
+	fakeroot debian/rules clean binary
+	mv ../*.deb .
 else
 	echo "$NAME install script"
 
@@ -133,12 +90,12 @@ else
 		chmod 755 "$OPTLOC"
 	fi
 
-	$INSTALL_FOLDER $OPTLOC
-	$INSTALL_PROGRAM "./$WEBSTARTER" $OPTLOC
-	$INSTALL_PROGRAM "./$APPSNAME" $OPTLOC
-	$INSTALL_PROGRAM "./$PASSWDNAME" $OPTLOC
-	$INSTALL_PROGRAM "./$A2CONFIG" $OPTLOC
-	$INSTALL_PROGRAM "./${0##*/}" $OPTLOC
+	$INSTALL_FOLDER ".$OPTLOC/*" $OPTLOC
+	$INSTALL_PROGRAM ".$OPTLOC/$WEBSTARTER" $OPTLOC
+	$INSTALL_PROGRAM ".$OPTLOC/$APPSNAME" $OPTLOC
+	$INSTALL_PROGRAM ".$OPTLOC/$PASSWDNAME" $OPTLOC
+	$INSTALL_PROGRAM ".$OPTLOC/$A2CONFIG" $OPTLOC
+	$INSTALL_PROGRAM ".$OPTLOC/${0##*/}" $OPTLOC
 
 	echo "Installing $ETCLOC"
 	if [ ! -d "$ETCLOC" ]; then
@@ -148,51 +105,22 @@ else
 
 	echo "Installing $XML_NAME"
 	if [ ! -e "$ETCLOC/$XML_NAME" ]; then
-		$INSTALL_DATA "./$XML_NAME" "$ETCLOC/$XML_NAME"
+		$INSTALL_DATA ".$ETCLOC/$XML_NAME" "$ETCLOC/$XML_NAME"
 	fi
 
     echo "Installing $XML_DEVNAME"
     if [ ! -e "$ETCLOC/$XML_DEVNAME" ]; then
-        $INSTALL_DATA "./$XML_DEVNAME" "$ETCLOC/$XML_DEVNAME"
+        $INSTALL_DATA ".$ETCLOC/$XML_DEVNAME" "$ETCLOC/$XML_DEVNAME"
     fi
 
     echo "Installing $XML_DOMONAME"
     if [ ! -e "$ETCLOC/$XML_DOMONAME" ]; then
-        $INSTALL_DATA "./$XML_DOMONAME" "$ETCLOC/$XML_DOMONAME"
+        $INSTALL_DATA ".$ETCLOC/$XML_DOMONAME" "$ETCLOC/$XML_DOMONAME"
     fi
 
-	PKG_OK=$(dpkg-query -W --showformat='${Status}\n' python3-pip|grep "install ok installed")
-	echo Checking for pip3: $PKG_OK
-	if [ "" == "$PKG_OK" ]; then
-		echo "No pip3. Setting up pip3."
-		sudo apt-get --force-yes --yes install python3-pip
-	fi
+    py3clean "$OPTLOC"
 
-	echo "Installing required python packages"
-	PKG_OK=$(sudo -H pip3 freeze| grep -i "Enum34==")
-	echo Checking for Enum: $PKG_OK
-	if [ "" == "$PKG_OK" ]; then
-		echo "No Enum. Setting up Enum."
-		sudo -H pip3 install enum34
-	fi
-	PKG_OK=$(sudo -H pip3 freeze| grep -i "Flask==")
-	echo Checking for Flask: $PKG_OK
-	if [ "" == "$PKG_OK" ]; then
-		echo "No Flask. Setting up Flask."
-		sudo -H pip3 install flask
-	fi
-	PKG_OK=$(sudo -H pip3 freeze| grep -i "psutil==")
-	echo Checking for psutil: $PKG_OK
-	if [ "" == "$PKG_OK" ]; then
-		echo "No psutil. Setting up psutil."
-		sudo -H pip3 install psutil
-	fi
-	PKG_OK=$(sudo -H pip3 freeze| grep -i "ifaddr==")
-	echo Checking for psutil: $PKG_OK
-	if [ "" == "$PKG_OK" ]; then
-		echo "No ifaddr. Setting up ifaddr."
-		sudo -H pip3 install ifaddr
-	fi
+    source "$PIP_INSTALL"
 
 	echo "Installing daemon $NAME"
 	read -p "Do you want to install an automatic startup service for $NAME (Y/n)? " -n 1 -r
@@ -202,7 +130,7 @@ else
 		echo "Skipping install automatic startup service for $NAME"
 	else
 		echo "Install automatic startup service for $NAME"
-		$INSTALL_DATA "$SYSTEMDDIR/$SERVICESCRIPT" "$SERVICEDIR/$SERVICESCRIPT"
+		$INSTALL_DATA ".$SERVICEDIR/$SERVICESCRIPT" "$SERVICEDIR/$SERVICESCRIPT"
 
 		systemctl enable $SERVICESCRIPT
 		systemctl start $SERVICESCRIPT
@@ -216,7 +144,7 @@ else
 		echo "Skipping install automatic startup service for $WEBNAME"
 	else
 		echo "Install automatic startup service for $WEBNAME"
-		$INSTALL_DATA "$SYSTEMDDIR/$WEBSERVICESCRIPT" "$SERVICEDIR/$WEBSERVICESCRIPT"
+		$INSTALL_DATA ".$SERVICEDIR/$WEBSERVICESCRIPT" "$SERVICEDIR/$WEBSERVICESCRIPT"
 
 		systemctl enable $WEBSERVICESCRIPT
 		systemctl start $WEBSERVICESCRIPT
