@@ -34,23 +34,14 @@ ActuatorTypes = {
     8: "percentage"
 }
 
-SmartHomeResponses = {
-    "key": {"set": ["on"], "get": ["on"]},
-    "voltage": {"set": [], "get": []},
-    "percentage": {"set": [], "get": []},
-    "current": {"set": [], "get": []},
-    "pressure": {"set": [], "get": []},
-    "temperature": {"set": [], "get": []},
-    "rain": {"set": [], "get": []},
-    "wind": {"set": [], "get": []},
-    "humidity": {"set": [], "get": []},
-    "light": {"set": ["on"], "get": ["on"]},
-    "socket": {"set": ["on"], "get": ["on"]},
-    "blind": {"set": ["openPercent"], "get": ["openPercent"]},
-    "doorlock": {"set": ["lock"], "get": ["isLocked","isJammed"]},
-    "amplifier": {"set": ["on"], "get": ["on"]},
-    "tv": {"set": ["on"], "get": ["on"]}
-}
+# Not all analog values are relevant for domotion control
+SmartHomeAnalog = ["brightness", "brightnessRelativePercent", "brightnessRelativeWeight", "temperatureK",
+                   "spectrumRgb", "temperature", "spectrumRGB", "amount", "rawValue", "currentFanSpeedPercent",
+                   "fanSpeedPercent", "fanSpeedRelativeWeight", "fanSpeedRelativePercent", "duration",
+                   "humiditySetpointPercent", "humidityAmbientPercent", "humidity", "openPercent",
+                   "rotationDegrees", "rotationPercent", "temperatureSetpointCelsius",
+                   "temperatureAmbientCelsius", "thermostatTemperatureSetpoint", "currentVolume",
+                   "volumeLevel", "relativeSteps"]
 
 # timer for db reload #time.time()
 DB_LIFETIME = 60
@@ -143,7 +134,6 @@ class DomoHandler(object):
 
     def checkDbItem(self, tag, type):
         dbItem = {}
-        #'BlindsManual': {'Description': 'Blinds Manual', 'Type': 'blind', 'Digital': True, 'value': 0}
         if tag in self.db:
             dbItem = self.db[tag]
             if dbItem["type"] != type:
@@ -151,88 +141,206 @@ class DomoHandler(object):
 
         return dbItem
 
-    def processParams(self, type, params):
+    def processParam(self, dbItem, data):
         value = 0
-        if type in SmartHomeResponses:
-            for response in SmartHomeResponses[type]['set']:
-                if response in params:
-                    # TBD: more in future
-                    if response == "openPercent":
-                        if params[response] > 50:
-                            value = 0
-                        else:
-                            value = 1
-                    else:
-                        value = 1 if params[response] else 0
+        digital = True
+        if "param" in data:
+            if data["param"] in SmartHomeAnalog:
+                digital = False
+        if digital:
+            if dbItem['digital']:
+                value = 1 if self.digital2Digital(data, data["value"]) else 0
+            else:
+                value = self.digital2Analog(data, data["value"])
+        else:
+            if dbItem['digital']:
+                value = 1 if self.analog2Digital(data, data["value"]) else 0
+            else:
+                value = self.analog2analog(data, data["value"])
         return value
 
-    def processValues(self, type, value):
-        values = {}
-        if type in SmartHomeResponses:
-            for response in SmartHomeResponses[type]['get']:
-                newvalue = {}
-                # TBD: more in future
-                if response == "openPercent":
-                    if int(value) > 0:
-                        newvalue[response] = 0
-                    else:
-                        newvalue[response] = 100
-                elif response == "isJammed":
-                    newvalue[response] = False
+    def processValue(self, dbItem, data, value):
+        newvalue = {}
+        digital = True
+        if "state" in data:
+            if data["state"] in SmartHomeAnalog:
+                digital = False
+        if "const" in data:
+            value = data["const"]
+        else:
+            if digital:
+                if dbItem['digital']:
+                    newvalue = self.digital2Digital(data, value)
                 else:
-                    newvalue[response] = True if int(value) > 0  else False
-                values.update(newvalue)
-        return values
+                    newvalue = self.analog2Digital(data, value)
+            else:
+                if dbItem['digital']:
+                    newvalue = self.digital2Analog(data, value)
+                else:
+                    newvalue = self.analog2analog(data, value, True)
+        return newvalue
 
-    def set(self, data):
+    def set(self, tag, data):
         rdata = {}
         error = False
+        value = 0
         if not self.checkDbValid():
             self.getDb()
         try:
-            dbItem = self.checkDbItem(data["tag"], data["type"])
-            if dbItem:
-                value = self.processParams(data["type"], data["params"])
-                tag, value = self.bdaclient.Send(data["tag"], value)
+            dbItem = self.checkDbItem(tag, data["type"])
+            if dbItem and not "const" in data and data["param"]:
+                value = self.processParam(dbItem, data)
+                tag, value = self.bdaclient.Send(tag, value)
                 if not tag:
                     error = True
-            else:
+            elif not "const" in data:
                 error = True
             if not error:
-                rdata["tag"] = data["tag"]
+                if "state" in data:
+                    if data["state"]:
+                        rdata["state"] = data["state"]
+                    else:
+                        error = True
+                else:
+                    rdata["state"] = "on"
+            if not error:
+                #rdata["tag"] = data["tag"]
                 rdata["type"] = data["type"]
-                rdata["values"] = self.processValues(data["type"], value)
+                rdata["value"] = self.processValue(dbItem, data, value)
         except:
             pass
 
         return rdata
 
-    def get(self, data):
+    def get(self, tag, data):
         rdata = {}
         error = False
+        value = 0
         if not self.checkDbValid():
             self.getDb()
         try:
-            dbItem = self.checkDbItem(data["tag"], data["type"])
-            if dbItem:
+            dbItem = self.checkDbItem(tag, data["type"])
+            if dbItem and not "const" in data:
                 if self.checkQueryValid():
                     value = dbItem["value"]
                     error = False
                 else:
-                    tag, value = self.bdaclient.Send(data["tag"], None)
+                    tag, value = self.bdaclient.Send(tag, None)
                     if not tag:
                         error = True
-            else:
+            elif not "const" in data:
                 error = True
             if not error:
-                rdata["tag"] = data["tag"]
+                if "state" in data:
+                    if data["state"]:
+                        rdata["state"] = data["state"]
+                    else:
+                        error = True
+                else:
+                    rdata["state"] = "on"
+            if not error:
+                #rdata["tag"] = data["tag"]
                 rdata["type"] = data["type"]
-                rdata["values"] = self.processValues(data["type"], value)
+                rdata["value"] = self.processValue(dbItem, data, value)
         except:
             pass
 
         return rdata
 
+    def analog2Digital(self, data, value):
+        trueop = "eq"
+        opval = 1.0
+        tstval = 1.0
+        try:
+            tstval = float(value)
+        except:
+            pass
+        if "trueop" in data:
+            trueop = data["trueop"]
+        if "opval" in data:
+            try:
+                opval = float(data["opval"])
+            except:
+                pass
+        retval = False
+        if trueop == "eq":
+            retval = (tstval == opval)
+        elif trueop == "ne":
+            retval = (tstval != opval)
+        elif trueop == "lt":
+            retval = (tstval < opval)
+        elif trueop == "gt":
+            retval = (tstval > opval)
+        elif trueop == "le":
+            retval = (tstval <= opval)
+        elif trueop == "ge":
+            retval = (tstval >= opval)
+        else:
+            retval = (tstval > 0)
+
+        return retval
+
+    def digital2Analog(self, data, value):
+        falseval = 0.0
+        trueval = 1.0
+        tstval = 1.0
+        try:
+            tstval = float(value)
+        except:
+            pass
+        if "falseval" in data:
+            try:
+                falseval = float(data["falseval"])
+            except:
+                pass
+        if "trueval" in data:
+            try:
+                trueval = float(data["trueval"])
+            except:
+                pass
+        retval = falseval
+        if tstval:
+            retval = trueval
+        return retval
+
+    def digital2Digital(self, data, value):
+        newvalue = False
+        if "falseval" in data or "trueval" in data:
+            if self.digital2Analog(data, value):
+                newvalue = True
+            else:
+                newvalue = False
+        else:
+            newvalue = self.analog2Digital(data, value)
+
+        return newvalue
+
+    def analog2Analog(self, data, value, inverse = False):
+        newvalue = 0.0
+        a = 1.0
+        b = 0.0
+        tstval = 1.0
+        try:
+            tstval = float(value)
+        except:
+            pass
+
+        if "a" in data:
+            try:
+                a = float(data["a"])
+            except:
+                pass
+        if "b" in data:
+            try:
+                b = float(data["b"])
+            except:
+                pass
+
+        if inverse:
+            newvalue = (tstval - b) / a
+        else:
+            newvalue = a * tstval + b
+        return newvalue
 
 ######################### MAIN ##########################
 if __name__ == "__main__":

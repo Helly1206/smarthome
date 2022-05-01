@@ -9,6 +9,7 @@ SERVICEDIR="$ETCDIR/systemd/system"
 SERVICESCRIPT="$NAME.service"
 WEBSERVICESCRIPT="$WEBNAME.service"
 PIP_INSTALL="$OPTLOC/pip_install.sh"
+XML_UPDATE="$OPTLOC/xmlUpdate"
 A2CHECKFILE="$OPTLOC/Apache2Config"
 A2CHECK="$A2CHECKFILE -c"
 A2INSTALLFILE="$OPTLOC/apache2_install.sh"
@@ -18,6 +19,10 @@ py3clean "$OPTLOC"
 
 if [ -f "$PIP_INSTALL" ]; then
     $PIP_INSTALL
+fi
+
+if [ -f "$XML_UPDATE" ]; then
+    $XML_UPDATE
 fi
 
 echo "Install automatic startup service for $NAME"

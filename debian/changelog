@@ -1,3 +1,15 @@
+smarthome (0.95) stable; urgency=low
+
+  * Updated devices XML to be able to handle multiple params/ states. params/ states are now coupled via domotion tags.
+
+ -- Helly1206 <hellyrulez@hotmail.com>  Sun, 1 May 2022 13:39:17 +0100
+
+smarthome (0.91) stable; urgency=low
+
+  * Adding custom operators to backend (see README.txt)
+
+ -- Helly1206 <hellyrulez@hotmail.com>  Mon, 18 Apr 2022 20:11:42 +0100
+
 smarthome (0.90) stable; urgency=low
 
   * Changing installation for DPKG/ APT compatibility

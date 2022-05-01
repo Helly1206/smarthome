@@ -19,7 +19,7 @@ from apps.utils.webserveraccess import webserveraccess
 #########################################################
 
 ####################### GLOBALS #########################
-VERSION = "0.90"
+VERSION = "0.95"
 APP_NAME = "smarthome"
 XML_NAME = "smarthomeDomotion.xml"
 

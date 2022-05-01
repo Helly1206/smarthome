@@ -72,10 +72,16 @@ class Domotion(object):
     def handle(self, data):
         rdata = {}
         self.logger.debug("<: {}".format(str(data)))
-        if "params" in data: # execute
-            rdata = self.DomoHandler.set(data)
-        else:
-            rdata = self.DomoHandler.get(data)
+        for tag, datum in data.items():
+            if tag != "device":
+                rdatum = {}
+                if "param" in datum: # execute
+                    if not "state" in datum:
+                        datum["state"] = datum["param"]
+                    rdatum = self.DomoHandler.set(tag, datum)
+                else:
+                    rdatum = self.DomoHandler.get(tag, datum)
+                rdata[tag] = rdatum.copy()
         self.logger.debug(">: {}".format(str(rdata)))
         return rdata
 

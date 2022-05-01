@@ -19,8 +19,11 @@
         </deviceInfo>
         <backEnd>
             <device>Domotion</device>
-            <tag>simplelight</tag>
-            <type>light</type>
+            <simplelight>
+                <param>on</param>
+                <state>on</state>
+                <type>light</type>
+            </simplelight>
         </backEnd>
     <MydeviceId>
 </devices>

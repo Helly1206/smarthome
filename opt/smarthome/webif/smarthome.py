@@ -237,12 +237,32 @@ class smarthome(object):
         device = ""
         data = {}
         try:
-            backend = self.devices.get(devid)['backEnd']
-            device = backend['device']
-            data['tag'] = backend['tag']
-            data['type'] = backend['type']
+            backend = self.devices.get(devid)["backEnd"]
+            device = backend["device"]
             if exec:
-                data['params'] = exec['params']
+                self.logger.info(exec)
+                for param, value in exec["params"].items():
+                    for tag, item in backend.items():
+                        if tag != "device":
+                            self.logger.info(param)
+                            self.logger.info(tag)
+                            self.logger.info(item)
+                            if item["param"] == param:
+                                data[tag] = item.copy()
+                                data[tag]["value"] = value
+                                if "state" in data[tag]:
+                                    if data[tag]["state"] == data[tag]["param"]:
+                                        del data[tag]["state"]
+                                else:
+                                    data[tag]["state"] = ""
+                                break
+
+            for tag, item in backend.items():
+                if tag != "device" and not tag in data:
+                    if "state" in item:
+                        data[tag] = item.copy()
+                        if "param" in data[tag]:
+                            del data[tag]["param"]
         except:
             pass
         return device, data
@@ -251,8 +271,13 @@ class smarthome(object):
         dataOk = False
         try:
             backend = self.devices.get(devid)['backEnd']
-            if rdata['device'] == backend['device'] and rdata['tag'] == backend['tag'] and rdata['type'] == backend['type']:
-                dataOk = True
+            if rdata['device'] == backend['device']:
+                for tag, item in rdata.items():
+                    for btag, bitem in backend.items():
+                        if tag != "device":
+                            if btag == tag and item["type"] == bitem["type"]:
+                                dataOk = True
+                                break
         except:
             pass
         return dataOk
@@ -260,7 +285,9 @@ class smarthome(object):
     def getshdaValues(self, rdata):
         values = {}
         try:
-            values = rdata["values"]
+            for tag, item in rdata.items():
+                if tag != "device":
+                    values.update({item["state"]: item["value"]})
         except:
             pass
         return values

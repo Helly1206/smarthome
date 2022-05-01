@@ -1,3 +1,9 @@
+[B]0.9.5[/B]
+- Updated devices XML to be able to handle multiple params/ states. params/ states are now coupled via domotion tags.
+
+[B]0.9.1[/B]
+- Adding custom operators to backend (see README.txt)
+
 [B]0.9.0[/B]
 - Changing installation for DPKG/ APT compatibility
 - Updated Apache2Config for better compatibility with other tools

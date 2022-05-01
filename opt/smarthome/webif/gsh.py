@@ -26,7 +26,7 @@ import atexit
 
 ####################### GLOBALS #########################
 context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-VERSION = "0.86"
+VERSION = "0.95"
 HOMEGRAPH_URL = 'https://homegraph.googleapis.com/'
 REQUEST_SYNC_BASE_URL = HOMEGRAPH_URL + 'v1/devices:requestSync'
 APP_NAME = "smarthome"

@@ -1,0 +1,135 @@
+#!/usr/bin/python3
+
+# -*- coding: utf-8 -*-
+#########################################################
+# SCRIPT : xmlUpdate                                    #
+#          Update xml file to new format                #
+#                                                       #
+#          I. Helwegen 2022                             #
+#########################################################
+
+####################### IMPORTS #########################
+from webif.devices import devices
+import xml.etree.ElementTree as ET
+from xml.dom.minidom import parseString
+import shutil
+import os
+
+####################### GLOBALS #########################
+VERSION  = "0.95"
+APP_NAME = "smarthome"
+ENCODING = "utf-8"
+
+SmartHomeResponses = {
+    "key": {"set": ["on"], "get": ["on"]},
+    "voltage": {"set": [], "get": []},
+    "percentage": {"set": ["brightness"], "get": ["brightness"]},
+    "current": {"set": [], "get": []},
+    "pressure": {"set": [], "get": []},
+    "temperature": {"set": [], "get": []},
+    "rain": {"set": [], "get": []},
+    "wind": {"set": [], "get": []},
+    "humidity": {"set": [], "get": []},
+    "light": {"set": ["on"], "get": ["on"]},
+    "socket": {"set": ["on"], "get": ["on"]},
+    "blind": {"set": ["openPercent"], "get": ["openPercent"]},
+    "doorlock": {"set": ["lock"], "get": ["isLocked","isJammed"]},
+    "amplifier": {"set": ["on"], "get": ["on"]},
+    "tv": {"set": ["on"], "get": ["on"]}
+}
+#########################################################
+
+###################### FUNCTIONS ########################
+def updateXML(file, Devices):
+    xml = ET.Element('devices')
+    buildXML(xml, Devices)
+    with open(file, "w") as xml_file:
+        xml_file.write(prettify(xml))
+
+def buildXML(xmltree, item):
+    if isinstance(item, dict):
+        for key, value in item.items():
+            kid = ET.SubElement(xmltree, key)
+            buildXML(kid, value)
+    else:
+        xmltree.text = settype(item)
+
+def prettify(elem):
+    """Return a pretty-printed XML string for the Element.
+    """
+    rough_string = ET.tostring(elem, ENCODING)
+    reparsed = parseString(rough_string)
+    return reparsed.toprettyxml(indent="\t").replace('<?xml version="1.0" ?>','<?xml version="1.0" encoding="%s"?>' % ENCODING)
+
+def settype(element):
+    retval = ""
+    if type(element) == bool:
+        if element:
+            retval = "true"
+        else:
+            retval = "false"
+    elif element != None:
+        retval = str(element)
+
+    return retval
+
+#########################################################
+
+######################### MAIN ##########################
+if __name__ == "__main__":
+    if os.getuid() != 0:
+        print("Superuser required, exit...")
+        exit(1)
+    devlist = []
+    needUpdate095 = False
+    dev = devices(__file__, APP_NAME)
+    Devices = dev.getAll()
+
+    for device, data in Devices.items():
+        if "backEnd" in data:
+            if "tag" in data["backEnd"]:
+                needUpdate095 = True
+                break
+
+    if needUpdate095:
+        print("Devices XML update for version 0.95 required")
+        print("Current file backupped to .old")
+        xmlfile = dev.getFileName()
+        oldfile = os.path.splitext(xmlfile)[0]+'.old'
+        try:
+            shutil.copy(xmlfile, oldfile)
+        except:
+            print("Error backing up file, exit...")
+            exit(1)
+
+        for device, data in Devices.items():
+            if "backEnd" in data:
+                if "tag" in data["backEnd"]:
+                    beData = data["backEnd"].copy()
+                    del data["backEnd"]["tag"]
+                    if "type" in data["backEnd"]:
+                        del data["backEnd"]["type"]
+                    newTag = {}
+                    newTag["param"] = SmartHomeResponses[beData["type"]]["set"][0]
+                    newTag["state"] = SmartHomeResponses[beData["type"]]["get"][0]
+                    if beData["type"] == "blind":
+                        newTag["trueop"] = "lt"
+                        newTag["opval"] = "50"
+                        newTag["falseval"] = "100"
+                        newTag["trueval"] = "0"
+                    newTag["type"] = beData["type"]
+                    data["backEnd"][beData["tag"]]=newTag
+                    if beData["type"] == "doorlock":
+                        newTag = {}
+                        newTag["state"] = SmartHomeResponses[beData["type"]]["get"][1]
+                        newTag["const"] = False
+                        newTag["type"] = beData["type"]
+                        data["backEnd"][SmartHomeResponses[beData["type"]]["get"][1]]=newTag
+        try:
+            updateXML(xmlfile, Devices)
+            print("Updated Devices XML file")
+        except:
+            print("Error writing Devices XML file, exit...")
+            exit(1)
+
+        print("Ready")

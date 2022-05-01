@@ -44,6 +44,9 @@ class devices(object):
     def getAll(self):
         return self.devices
 
+    def getFileName(self):
+        return self._getXML()
+
     def _readDevicesXML(self):
         del self.devices
         self.devices = {}

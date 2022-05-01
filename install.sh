@@ -20,6 +20,7 @@ SERVICEDIR="$ETCDIR/systemd/system"
 SERVICESCRIPT="$NAME.service"
 WEBSERVICESCRIPT="$WEBNAME.service"
 PIP_INSTALL="$OPTLOC/pip_install.sh"
+XML_UPDATE="$OPTLOC/xmlUpdate"
 DEBFOLDER="debian"
 
 if [ "$EUID" -ne 0 ]
@@ -95,6 +96,7 @@ else
 	$INSTALL_PROGRAM ".$OPTLOC/$APPSNAME" $OPTLOC
 	$INSTALL_PROGRAM ".$OPTLOC/$PASSWDNAME" $OPTLOC
 	$INSTALL_PROGRAM ".$OPTLOC/$A2CONFIG" $OPTLOC
+    $INSTALL_PROGRAM ".$XML_UPDATE" $OPTLOC
 	$INSTALL_PROGRAM ".$OPTLOC/${0##*/}" $OPTLOC
 
 	echo "Installing $ETCLOC"
@@ -121,6 +123,8 @@ else
     py3clean "$OPTLOC"
 
     source "$PIP_INSTALL"
+
+    source "$XML_UPDATE"
 
 	echo "Installing daemon $NAME"
 	read -p "Do you want to install an automatic startup service for $NAME (Y/n)? " -n 1 -r

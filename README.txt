@@ -1,4 +1,4 @@
-gsh - smarthome v0.90
+gsh - smarthome v0.95
 
 GSH - Google smarthome multiplexer
 === = ====== ========= ===========
@@ -189,6 +189,30 @@ See https://developers.google.com/assistant/smarthome/guides for more info.
         <type>SWITCH</type> # type on your device, used as extra check
     </backEnd>
 <deviceId>
+
+Backend operators:
+------- ----------
+To distiguish analog values that may have a digital backend or a different gain or the opposite, special operators may be used.
+Analog to digital backend or digital to analog backend (or digital to digital backend):
+<trueop>  : can be lt (less than), gt (greater than), le (less or equal than),
+            ge (greater or equal than), eq (equal), ne (not equal)
+            default: eq
+<opval>   : analog value (e.g. 50 if a percentage is given)
+            default: 1
+<falseval>: analog value for false (e.g. 0)
+            default: 0
+<trueval> : analog value for true (e.g. 100)
+            default: 1
+
+Analog to analog backend:
+<a>       : factor a of equation y = a*x + b (where y is the backend value)
+            default: 1
+<b>       : factor b of equation y = a*x + b (where y is the backend value)
+            default: 0
+
+Constant value operator:
+<const>   : This value is returned when query. No backend request is done.
+            On execute, this command is not executed to backend.
 
 Domotion configuration:
 -------- --------------
