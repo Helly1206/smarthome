@@ -156,7 +156,7 @@ class DomoHandler(object):
             if dbItem['digital']:
                 value = 1 if self.analog2Digital(data, data["value"]) else 0
             else:
-                value = self.analog2analog(data, data["value"])
+                value = self.analog2Analog(data, data["value"])
         return value
 
     def processValue(self, dbItem, data, value):
@@ -177,7 +177,7 @@ class DomoHandler(object):
                 if dbItem['digital']:
                     newvalue = self.digital2Analog(data, value)
                 else:
-                    newvalue = self.analog2analog(data, value, True)
+                    newvalue = self.analog2Analog(data, value, True)
         return newvalue
 
     def set(self, tag, data):

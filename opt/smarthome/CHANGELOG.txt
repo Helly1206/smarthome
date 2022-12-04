@@ -1,3 +1,6 @@
+[B]0.9.6[/B]
+- Fixed bug in analog to analog signal conversion
+
 [B]0.9.5[/B]
 - Updated devices XML to be able to handle multiple params/ states. params/ states are now coupled via domotion tags.
 

@@ -1,4 +1,4 @@
-gsh - smarthome v0.95
+gsh - smarthome v0.96
 
 GSH - Google smarthome multiplexer
 === = ====== ========= ===========
@@ -184,9 +184,13 @@ See https://developers.google.com/assistant/smarthome/guides for more info.
         <swVersion>11.4</swVersion>
     </deviceInfo>
     <backEnd> # Your backend information
-        <device>Domotion</device> # Device to control
-        <tag>Blinds</tag> # tag as it is called on your device
-        <type>SWITCH</type> # type on your device, used as extra check
+        <Blinds> #tagname
+            <param>openPercent</param> # type parameter for google smarthome
+            <state>openPercent</state> # type returned state for google smarthome
+            <a>1</a>
+            <b>0</b>
+            <type>percentage</type> # type on your device, used as extra check
+        </Blinds>
     </backEnd>
 <deviceId>
 
