@@ -2,7 +2,7 @@ smarthome (0.96) stable; urgency=low
 
   * Fixed bug in analog to analog signal conversion
 
-   -- Helly1206 <hellyrulez@hotmail.com>  Sun, 4 Dec 2022 11:03:42 +0100
+ -- Helly1206 <hellyrulez@hotmail.com>  Sun, 4 Dec 2022 11:03:42 +0100
 
 smarthome (0.95) stable; urgency=low
 
