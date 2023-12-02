@@ -103,6 +103,7 @@ class smarthome(object):
         https://developers.google.com/assistant/smarthome/reference/intent/sync
         """
         devices = []
+        self.devices.reload()
         for deviceId, device in self.devices.getAll().items():
             try:
                 dev = {}
@@ -240,13 +241,9 @@ class smarthome(object):
             backend = self.devices.get(devid)["backEnd"]
             device = backend["device"]
             if exec:
-                self.logger.info(exec)
                 for param, value in exec["params"].items():
                     for tag, item in backend.items():
                         if tag != "device":
-                            self.logger.info(param)
-                            self.logger.info(tag)
-                            self.logger.info(item)
                             if item["param"] == param:
                                 data[tag] = item.copy()
                                 data[tag]["value"] = value

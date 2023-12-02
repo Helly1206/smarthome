@@ -14,14 +14,14 @@ import logging.handlers
 import locale
 import sys
 from apps.Domotion import Domotion
+from apps.Mqtt import Mqtt
 from webif.devices import devices
 from apps.utils.webserveraccess import webserveraccess
 #########################################################
 
 ####################### GLOBALS #########################
-VERSION = "0.95"
+VERSION = "1.00"
 APP_NAME = "smarthome"
-XML_NAME = "smarthomeDomotion.xml"
 
 #########################################################
 # Class : gshMux                                        #
@@ -54,12 +54,12 @@ class gshMux(object):
 
         devlist = self.getDevices()
         for dev in devlist:
-            if 1: #try:
+            try:
                 app = globals()[dev](self.file, APP_NAME)
                 app.run()
                 self.apps[dev] = app
-            #except:
-            #    self.logger.error("App not available: {}".format(dev))
+            except:
+                self.logger.error("App not available: {}".format(dev))
 
         signal.pause()
 

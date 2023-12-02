@@ -32,7 +32,7 @@ then
 		echo "Running Apache2 uninstall script"
 		echo "Uninstalling $NAME from $WEB_ROOT"
 
-		if [ -d "$DOMOWEB_ROOT" ]; then rm -rf "$DOMOWEB_ROOT"; fi
+		if [ -d "$GSHWEB_ROOT" ]; then rm -rf "$GSHWEB_ROOT"; fi
 	fi
 elif [ "$1" == "-f" ] || [ "$1" == "-F" ]
 then
@@ -44,7 +44,7 @@ then
 	echo "Running Apache2 uninstall script"
 	echo "Uninstalling $NAME from $WEB_ROOT"
 
-	if [ -d "$DOMOWEB_ROOT" ]; then rm -rf "$DOMOWEB_ROOT"; fi
+	if [ -d "$GSHWEB_ROOT" ]; then rm -rf "$GSHWEB_ROOT"; fi
 elif [ "$1" == "-h" ] || [ "$1" == "-H" ]
 then
 	echo "Usage:"

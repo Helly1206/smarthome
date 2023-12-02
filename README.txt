@@ -1,9 +1,9 @@
-gsh - smarthome v0.96
+gsh - smarthome v1.00
 
 GSH - Google smarthome multiplexer
 === = ====== ========= ===========
 
-This piece of software brings smarthome commands to the local system. It makes it possible to operate e.g. Domotion by google assistant,
+This piece of software brings smarthome commands to the local system. It makes it possible to operate e.g. Domotion or MQTT by google assistant,
 but also apps can be made to talk with other 3rd party devices.
 
 Installation:
@@ -184,6 +184,7 @@ See https://developers.google.com/assistant/smarthome/guides for more info.
         <swVersion>11.4</swVersion>
     </deviceInfo>
     <backEnd> # Your backend information
+        <device>Domotion</device>
         <Blinds> #tagname
             <param>openPercent</param> # type parameter for google smarthome
             <state>openPercent</state> # type returned state for google smarthome
@@ -193,6 +194,31 @@ See https://developers.google.com/assistant/smarthome/guides for more info.
         </Blinds>
     </backEnd>
 <deviceId>
+
+# Alternative backend for mqtt
+    <backEnd> # Your backend information
+        <device>Mqtt</device>
+        <Blinds> #topicname
+            <itemmqtt>
+                <maintopic>myhome/device</maintopic>
+                <stat_t>blinds_status</stat_t> # topic to publish (is topicname if omitted)
+                <cmd_t>blinds</cmd_t> # topic to subscribe to (is topicname if omitted)
+            </itemmqtt>
+            <listenmqtt>
+                <maintopic>myhome/device</maintopic>
+                <sub_t>blinds</sub_t> # topic to subscribe to (is topicname if omitted)
+            </listenmqtt>
+            <param>openPercent</param> # type parameter for google smarthome
+            <state>openPercent</state> # type returned state for google smarthome
+            <a>1</a>
+            <b>0</b>
+            <dir>send</dir> # direction, send or receive
+            <type>analog</type> # type on your device, analog, digital, same (is same if omitted)
+            <hadisco>
+                <name>blinds</name>
+            </hadisco>
+        </Blinds>
+    </backEnd>
 
 Backend operators:
 ------- ----------
@@ -218,6 +244,39 @@ Constant value operator:
 <const>   : This value is returned when query. No backend request is done.
             On execute, this command is not executed to backend.
 
+Smarthome parameters:
+<param>   : Type parameter for google smarthome
+<state>   : Type returned state for google smarthome
+
+Type operator:
+<dir>     : send or receive (is send if omitted) 
+<type>    : Domotion: Signal type
+            MQTT: type on your device, analog, digital, same (is same if omitted).
+            for home assistant: 
+                publish: digital = binary_sensor, analog = sensor, event (digital) also implemented
+                         events are never retained, even if retain is set
+                subscribe: digital = switch, analog = number
+
+MQTT topic:
+<maintopic> : Main mqtt topic for device (topics are full topics if omitted)
+<cmd_t>     : only for HA output device (subscribe)
+<stat_t>    : only for HA input device, for output device the current value is copied (publish)
+
+Listen MQTT topic:
+<maintopic> : Main mqtt topic for device (topics are full topics if omitted)
+<sub_t>     : Topic to subscribe to
+Listen topics are not added to home assitant discovery, 
+these are to return e.g. current status of a switch.
+
+Home Assistant additions (if omitted, no Home Assistant discovery is added):
+<name>      : Name of the device for Home Assistant
+<dev_cla>   : Device class for Home Assistant (none if omitted)
+              sensor: power_factor or none (generic sensor)
+              binary_sensor: light, power or none (generic)
+              event: button, doorbell or none (generic event)
+              switch: none (generic switch)
+              number: power_factor or none (generic number)
+
 Domotion configuration:
 -------- --------------
 <smarthomeDomotion>
@@ -227,6 +286,18 @@ Domotion configuration:
 	<password></password> # can be empty if system runs on same pc or local network (equal to Domotion bda password)
     <debuglog>false</debuglog> # can be used for extra debug logging of all commands
 </smarthomeDomotion>
+
+MQTT configuration:
+---- --------------
+<smarthomeMqtt>
+	<brokeraddress></brokeraddress> # broker address of MQTT broker
+    <port></port> # port of MQTT broker
+	<username></username> # username to log in to broker (can be empty)
+	<password></password> # password to log in to broker (can be empty)
+    <debuglog>false</debuglog> # can be used for extra debug logging of all commands
+    <qos>0</qos> # MQTT Quality of Service
+    <hatopic> home assistant topic (default homeassistant, omit if homeassistant not used)
+</smarthomeMqtt>
 
 That's all for now ...
 

@@ -1,3 +1,10 @@
+smarthome (1.00) stable; urgency=low
+
+  * Automatically reload devices file on sync (on webinterface)
+  * Added MQTT as backend option
+
+ -- Helly1206 <hellyrulez@hotmail.com>  Sat, 2 Dec 2023 14:31:24 +0100
+
 smarthome (0.96) stable; urgency=low
 
   * Fixed bug in analog to analog signal conversion

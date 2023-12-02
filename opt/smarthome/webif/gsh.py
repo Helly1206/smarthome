@@ -336,7 +336,7 @@ def webhook():
         app.logger.debug("Response: {}".format(response))
         try:
             if 'errorCode' in response['payload']:
-                app.logger.error('Error handling message %s: %s' % (message, response['payload']))
+                app.logger.error('Error handling message: %s' % (response['payload']))
         except:
             pass
 
