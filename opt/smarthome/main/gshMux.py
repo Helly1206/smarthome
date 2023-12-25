@@ -20,7 +20,7 @@ from apps.utils.webserveraccess import webserveraccess
 #########################################################
 
 ####################### GLOBALS #########################
-VERSION = "1.00"
+VERSION = "1.01"
 APP_NAME = "smarthome"
 
 #########################################################

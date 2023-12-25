@@ -393,8 +393,6 @@ class MqttHandler(object):
         type = "digital" if digital else "analog"
         if "type" in data and not data["type"].lower() == "same":
             type = data["type"].lower()
-        if type == "event":
-            retain = False
         if digital:
             if type == "digital" or type == "event":
                 value = 1 if self.convert.digital2Digital(data, data["value"]) else 0
@@ -405,6 +403,9 @@ class MqttHandler(object):
                 value = 1 if self.convert.analog2Digital(data, data["value"]) else 0
             else:
                 value = self.convert.analog2Analog(data, data["value"])
+        if type == "event":
+            retain = False
+            value = json.dumps({"event_type": str(value)})
         return value, retain
 
     def processValue(self, data, value):
@@ -413,6 +414,12 @@ class MqttHandler(object):
         type = "digital" if digital else "analog"
         if "type" in data and not data["type"].lower() == "same":
             type = data["type"].lower()
+        if type == "event":
+            try:
+                val = json.loads(value)
+                value = int(val["event_type"])
+            except:
+                value = 0
         if "const" in data:
             value = data["const"]
         else:

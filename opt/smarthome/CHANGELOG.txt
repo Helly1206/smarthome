@@ -1,3 +1,6 @@
+[B]1.0.1[/B]
+- Fixed bug on MQTT event event type
+
 [B]1.0.0[/B]
 - Automatically reload devices file on sync (on webinterface)
 - Added MQTT as backend option
